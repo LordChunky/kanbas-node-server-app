@@ -10,10 +10,30 @@ export default function UserRoutes(app) {
     const deleteUser = (req, res) => { };
 
     // Find All User
-    const findAllUsers = (req, res) => { };
+    const findAllUsers = async (req, res) => {
+        const { role, name } = req.query;
+        if (role) {
+            const users = await dao.findUsersByRole(role);
+            res.json(users);
+            return;
+        }
+        if (name) {
+            const users = await dao.findUsersByPartialName(name);
+            res.json(users);
+            return;
+        }
+      
+        const users = await dao.findAllUsers();
+        res.json(users);
+    };
+    
 
     // Find User by ID
-    const findUserById = (req, res) => { };
+    const findUserById = async (req, res) => {
+        const user = await dao.findUserById(req.params.userId);
+        res.json(user);
+    };
+
 
     // UPDATE USER
     // If a user updates their profile, then the session must be kept in synch.
@@ -31,13 +51,13 @@ export default function UserRoutes(app) {
     // If a user with that username already exists, an error is returned. 
     // Otherwise, create the new user and store it in the session's currentUser 
     // property to remember that this new user is now the currently logged-in user.
-    const signup = (req, res) => { 
-        const user = dao.findUserByUsername(req.body.username);
+    const signup = async (req, res) => { 
+        const user = await dao.findUserByUsername(req.body.username);
         if (user) {
             res.status(400).json({ message: "Username already in use" });
             return;
         }
-        const currentUser = dao.createUser(req.body);
+        const currentUser = await dao.createUser(req.body);
         req.session["currentUser"] = currentUser;
         res.json(currentUser);
     };
@@ -47,9 +67,9 @@ export default function UserRoutes(app) {
     // The signin route below looks up the user by their credentials, stores 
     // it in currentUser session, and responds with the user if they exist. 
     // Otherwise responds with an error.
-    const signin = (req, res) => { 
+    const signin = async (req, res) => { 
         const { username, password } = req.body;
-        const currentUser = dao.findUserByCredentials(username, password);
+        const currentUser = await dao.findUserByCredentials(username, password);
         if (currentUser) {
             req.session["currentUser"] = currentUser;
             res.json(currentUser);
@@ -114,4 +134,6 @@ export default function UserRoutes(app) {
     app.post("/api/users/profile", profile);
     app.get("/api/users/:userId/courses", findCoursesForEnrolledUser);
     app.post("/api/users/current/courses", createCourse);
+    app.get("/api/users", findAllUsers);
+    app.get("/api/users/:userId", findUserById);
 }
