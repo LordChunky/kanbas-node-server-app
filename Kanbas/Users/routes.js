@@ -4,10 +4,17 @@ import * as enrollmentsDao from "../Enrollments/dao.js";
 
 export default function UserRoutes(app) {
     // Create User
-    const createUser = (req, res) => { };
+    const createUser = async (req, res) => {
+        const user = await dao.createUser(req.body);
+        res.json(user);
+    };
+    
 
     // Delete User
-    const deleteUser = (req, res) => { };
+    const deleteUser = async (req, res) => { 
+        const status = await dao.deleteUser(req.params.userId);
+        res.json(status);
+    };
 
     // Find All User
     const findAllUsers = async (req, res) => {
@@ -37,12 +44,14 @@ export default function UserRoutes(app) {
 
     // UPDATE USER
     // If a user updates their profile, then the session must be kept in synch.
-    const updateUser = (req, res) => { 
+    const updateUser = async (req, res) => { 
         const userId = req.params.userId;
         const userUpdates = req.body;
-        dao.updateUser(userId, userUpdates);
-        const currentUser = dao.findUserById(userId);
-        req.session["currentUser"] = currentUser;
+        await dao.updateUser(userId, userUpdates);
+        const currentUser = req.session["currentUser"];
+        if (currentUser && currentUser._id === userId) {
+          req.session["currentUser"] = { ...currentUser, ...userUpdates };
+        }
         res.json(currentUser);    
     };
 
