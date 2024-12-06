@@ -8,7 +8,7 @@ export default function EnrollmentRoutes(app) {
     // get all enrollments
     app.get("/api/enrollments", (req, res) => {
         const enrollments = dao.findAllEnrollments();
-        res.send(enrollments);
+        res.json(enrollments);
     });
 
     // enroll a student
