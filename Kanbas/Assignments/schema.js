@@ -5,9 +5,9 @@ const assignmentSchema = new mongoose.Schema(
         title: String,
         description: String,
         points: String,
-        due_at: String,
-        available_day: String,
-        until_day: String,
+        due_at: Date,
+        available_day: Date,
+        until_day: Date,
     },
     { collection: "assignments" }
 );
